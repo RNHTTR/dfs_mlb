@@ -63,7 +63,7 @@ def player_data(position, columns, cat_cols):
 if __name__ == '__main__':
     '''
     '''
-    batter_columns=['p/h','mlb_id','hand','oppt_pitch_hand','condition','adi',
+    batter_columns=['p/h','mlb_id','date','hand','oppt_pitch_hand','condition','adi',
                     'order','w_speed','w_dir','oppt_pitch_name','dk_salary',
                     'fd_salary','fd_pos','dk_points']
     batter_cat_cols=['condition','w_dir']

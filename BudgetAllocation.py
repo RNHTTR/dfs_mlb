@@ -1,3 +1,7 @@
+'''
+Determine how to allocate budget between positions.
+'''
+
 import pandas as pd
 
 

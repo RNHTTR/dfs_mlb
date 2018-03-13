@@ -34,10 +34,10 @@ def knapsack(df, cols, max_weight, n, start):
     (weight), and maximum number of items.
 
     Args:
-        df (Pandas DataFrame)
+        df   (Pandas DF): Pandas DataFrame with player data
         cols (list[str]): List of columns to be used in the knapsack problem
-        max_weight (int):   Maximum combined value of assets (capacity)
-        n          (int):   Maximum number of assets permitted
+        max_weight (int): Maximum combined value of assets (capacity)
+        n          (int): Maximum number of assets permitted
 
     Returns:
         most_valuable (list[*]): List of tuples of assets and their value
@@ -57,7 +57,6 @@ def knapsack(df, cols, max_weight, n, start):
     i = 0
     j = 1
     for i in range(start, num_players):
-        # print('player {} of {} players'.format(i, num_players), end='\r')
         sys.stdout.write('player {} of {} players\r'.format(i, num_players))
         sys.stdout.flush()
         sys.stdout.flush()
@@ -78,13 +77,21 @@ def knapsack(df, cols, max_weight, n, start):
 
 def run_random(n_iter, df, cols, max_weight, n):
     '''
+    Return list of n players that maximizes projected points over n_iter iterations
+
+    Args:
+        n_iter     (int): Number of times to generate a random list of players
+        df   (Pandas DF): Pandas DataFrame with player data
+        cols (list[str]): List of columns to be used in the knapsack problem
+        max_weight (int): Maximum combined value of assets (capacity)
+        n          (int): Maximum number of assets permitted
+
+    Returns:
+        actually_most_valuable (list[*]): List of tuples of assets and their value
     '''
     actually_most_valuable = []
 
     for i in range(n_iter):
-        # print('Iteration {} of {}'.format(i, n_iter), end='\r')
-        # sys.stdout.write('\rIteration {} of {}\r'.format(i, n_iter))
-        # sys.stdout.write('Iteration {} of {}\r'.format(i, n_iter))
         print('Iteration {} of {}           \r'.format(i, n_iter))
         sys.stdout.flush()
         rand_int = np.random.randint(0, df.shape[0])
@@ -99,16 +106,8 @@ def run_random(n_iter, df, cols, max_weight, n):
 
 
 if __name__ == '__main__':
-    # d = {'dk_salary': [10, 15, 5, 2, 1],
-    #      'mlb_id': ["Ryan", "Ashley", "Ang", "Nikolai", "Jim"],
-    #      'proj_points': [15, 20, 10, 5, 4]}
-    # cols = ['mlb_id', 'dk_salary', 'proj_points']
-    # df = pd.DataFrame(data=d)
-
     df = pd.read_csv('batter_predictions.csv', index_col=0)
     df = df.loc[df['fd_pos'] == 7]
     cols = ['mlb_id', 'dk_salary', 'Predictions']
 
     print('Final most val: {}'.format(run_random(100, df, cols, 15000, 3)))
-    # knapsack(df, cols, 15000, 3, start)
-    #     items = [('Ryan', 15, 10), ('Ash', 20, 15), ('Ang', 10, 5), ('Arya', 5, 2), ('Jim', 4, 1)]
