@@ -7,7 +7,9 @@ import sys
 import numpy as np
 import pandas as pd
 
-
+# '''
+# Make use of avg points last 30
+# NOTE - how can we configure this to use all data sets?
 df = pd.read_csv('batter_data.csv', index_col=0)
 df = df.drop(['hand','oppt_pitch_hand'], axis=1)
 
@@ -33,4 +35,13 @@ for index, row in df.iterrows():
 
 df = df.dropna(axis=0)
 print(df)
-df.to_csv('20170718_batter_data')
+df.to_csv('20170718_batter_data.csv')
+# '''
+
+# df_2016 = pd.read_csv('batter_data_2016.csv', index_col=0)
+# df_2017 = pd.read_csv('batter_data_2017.csv', index_col=0)
+# df_2017 = df_2017.drop(columns=['none'])
+# df_2016 = df_2016.drop(columns=['unknown'])
+# df_all  = pd.concat([df_2016, df_2017])
+# # print(df_all.head())
+# df_all.to_csv('batter_data_all.csv')

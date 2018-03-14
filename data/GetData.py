@@ -11,7 +11,11 @@ def get_rotoguru_data():
 
     Returns
     '''
-    page = requests.get("http://rotoguru1.com/cgi-bin/mlb-dbd-2017.pl?&user=madrhatter&key=M3487509151")
+    # 2017 link
+    # page = requests.get("http://rotoguru1.com/cgi-bin/mlb-dbd-2017.pl?&user=madrhatter&key=M3487509151")
+    # 2016 link
+    page = requests.get("http://rotoguru1.com/cgi-bin/mlb-dbd-2016.pl?&user=madrhatter&key=M6911301251")
+    
     soup = BeautifulSoup(page.content, 'lxml')
     p  = soup.p.get_text()
     data = p.split('\n\n', 1)[0]
@@ -37,4 +41,4 @@ def read_fangraphs_pitcher_data():
 
 if __name__ == '__main__':
     df = get_rotoguru_data()
-    df.to_csv('raw_rotoguru_data.csv')
+    df.to_csv('raw_rotoguru_data_2016.csv')

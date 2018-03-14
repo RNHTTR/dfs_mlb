@@ -10,12 +10,20 @@ from GetData import read_fangraphs_pitcher_data
 # from OpponentPitcherData import read_pitcher_data
 
 
-def one_hot(df, columns, cat_columns):
+def one_hot(df, columns, cat_cols):
     '''
     One hot encode categorical variables
+
+    Args:
+        df (Pandas DF)      : Player data
+        columns  (list[str]): All columns to be read into the DataFrame
+        cat_cols (list[str]): Categorical columns that need to be one-hot encoded
+
+    Returns:
+        df (Pandas DF): Player data w/categorical features one-hot encoded
     '''
     df = df[columns]
-    for col in cat_columns:
+    for col in cat_cols:
         one_hot = pd.get_dummies(df[col])
         df = df.drop(col, axis=1)
         df = df.join(one_hot)
@@ -28,10 +36,10 @@ def player_data(position, columns, cat_cols):
     Args:
         position (str)      : P for pitchers, H for hitters
         columns  (list[str]): All columns to be read into the DataFrame
-        cat_cols (list[str]): Categorical columns that need to be one-hot encoded.
+        cat_cols (list[str]): Categorical columns that need to be one-hot encoded
 
     Returns:
-        df (Pandas DataFrame): Player data for batters or pitchers
+        df (Pandas DF): Player data for batters or pitchers
     '''
     position = position.upper()
 
@@ -39,8 +47,9 @@ def player_data(position, columns, cat_cols):
         "Position must be given as a single letter, P for pitchers or H for " \
         "hitters."
 
+    # NOTE - This should be done in if __name__ block and passed as a param...
     # df = get_rotoguru_data()
-    df = pd.read_csv('raw_rotoguru_data.csv')
+    df = pd.read_csv('raw_rotoguru_data_2016.csv')
     df = one_hot(df, columns, cat_cols)
     df = df.loc[df['p/h'] == position]
     df = df.drop('p/h', axis=1)
@@ -53,7 +62,6 @@ def player_data(position, columns, cat_cols):
     else:
         fangraphs_pitcher_df.rename(index=str, columns={"oppt_pitch_name": "name_last_first"}, inplace=True)
         df = df.merge(fangraphs_pitcher_df, on='name_last_first')
-        # df = df.drop('name_last_first', axis=1)
 
     df = df.dropna(axis=0)
 
@@ -70,7 +78,7 @@ if __name__ == '__main__':
     # #
     batter_df = player_data("h", batter_columns, batter_cat_cols)
     batter_df['hand_advantage'] = np.where(batter_df['hand'] == batter_df['oppt_pitch_hand'], 0, 1)
-    batter_df.to_csv('batter_data.csv')
+    batter_df.to_csv('batter_data_2016.csv')
     # df = pd.read_csv('batter_data_full.csv', index_col=0)
     # df = df.drop('hand', axis=1)
     # df = df.drop('oppt_pitch_hand', axis=1)

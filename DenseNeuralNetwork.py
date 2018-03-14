@@ -9,7 +9,8 @@ from tensorflow.python.keras.layers import Dense, Dropout, BatchNormalization
 
 
 # TODO - Read from command line parameters
-df = pd.read_csv('data/20170718_batter_data.csv', index_col=0)
+# df = pd.read_csv('data/20170718_batter_data.csv', index_col=0)
+df = pd.read_csv('data/batter_data_all.csv', index_col=0)
 
 # Set seed for reproducing results
 seed = 7
