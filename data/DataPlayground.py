@@ -10,8 +10,10 @@ import pandas as pd
 # '''
 # Make use of avg points last 30
 # NOTE - how can we configure this to use all data sets?
-df = pd.read_csv('batter_data.csv', index_col=0)
-df = df.drop(['hand','oppt_pitch_hand'], axis=1)
+     # NOTE - ANSWER! Sort the DF by mlb_id
+# df = pd.read_csv('batter_data_all.csv', index_col=0)
+df = pd.read_csv('batter_data_all_2.csv')
+# df = df.drop(['hand','oppt_pitch_hand'], axis=1)
 
 row_count = df.shape[0]
 
@@ -35,8 +37,24 @@ for index, row in df.iterrows():
 
 df = df.dropna(axis=0)
 print(df)
-df.to_csv('20170718_batter_data.csv')
+df.to_csv('20170718_batter_data_2.csv', index=False)
 # '''
+
+# batter_df = pd.read_csv('batter_data_2015.csv', index_col=0)
+# batter_df = batter_df.drop(['hand', 'oppt_pitch_hand'], axis=1)
+# print(batter_df.columns)
+# print(batter_df.head())
+# all_df = pd.read_csv('batter_data_all.csv')
+# print(all_df.head())
+# df_all = pd.concat([all_df, batter_df])
+# df_all = df_all.sort_values(by=['mlb_id'])
+# print(df_all.tail())
+# df_all.to_csv('batter_data_all_2.csv', index=False)
+#
+# batter_df = pd.read_csv('batter_data_all-bkp.csv', index_col=0)
+# batter_df = batter_df.drop(['B', 'L_', 'R_', 'L_.1', 'R_.1'], axis=1)
+# batter_df = batter_df.sort_values(by=['mlb_id'])
+# batter_df.to_csv('batter_data_all.csv', index=False)
 
 # df_2016 = pd.read_csv('batter_data_2016.csv', index_col=0)
 # df_2017 = pd.read_csv('batter_data_2017.csv', index_col=0)
