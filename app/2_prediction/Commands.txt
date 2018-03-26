@@ -1,0 +1,1 @@
+python DenseNeuralNetwork.py input_file_name=../1_data/batter_data.csv output_file_name=batter_predictions.csv
