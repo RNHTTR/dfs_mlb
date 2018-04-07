@@ -1,3 +1,10 @@
+[Raw data]
 python GetData.py year=all
+python GetData.py year=new
+
+[Training data]
 python FormatData.py data_file_path=raw_rotoguru_data_all.csv position=H output_file_path=batter_data.csv
 python PointsLast30.py start_date=20170618 stop_date=20170718 input_file_name=batter_data.csv output_file_name=game_data.csv
+
+[Prediction data]
+python FormatData.py data_file_path=raw_X_batter.csv position=H output_file_path=X_batter_data.csv

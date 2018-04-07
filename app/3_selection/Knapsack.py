@@ -58,7 +58,7 @@ def knapsack(df, cols, max_weight, n, start):
     j = 1
     for i in range(start, num_players):
         sys.stdout.write('player {} of {} players\r'.format(i, num_players))
-        sys.stdout.flush()
+        # sys.stdout.flush()
         sys.stdout.flush()
         current.append(player_data[i])
         for j in range(start, num_players):
@@ -93,21 +93,21 @@ def run_random(n_iter, df, cols, max_weight, n):
 
     for i in range(n_iter):
         print('Iteration {} of {}           \r'.format(i, n_iter))
-        sys.stdout.flush()
+        # sys.stdout.flush()
         rand_int = np.random.randint(0, df.shape[0])
         most_valuable = knapsack(df, cols, max_weight, n, rand_int)
         x, value = get_salary_and_value(most_valuable, 1, 2)
         x, super_value = get_salary_and_value(actually_most_valuable, 1, 2)
         if value > super_value:
             actually_most_valuable = most_valuable
-            print('New most Valuable: {}'.format(actually_most_valuable))
 
     return actually_most_valuable
 
 
-def main(input_file_name, n_of=6, n_inf=2,
-         positions=[2, 3, 4, 5, 6, 7]
+def main(input_file_name, output_file_name, n_of=6, n_inf=2,
+         positions=[2, 3, 4, 5, 6, 7],
          prop_of=30000, prop_inf=10000, n_iter=100):
+        # prop_of=30000, prop_inf=10000, n_iter=1):
     '''
     Return list of n players that maximizes projected points over n_iter iterations
 
@@ -120,7 +120,7 @@ def main(input_file_name, n_of=6, n_inf=2,
         prop_inf (int)       : Salary portion for infielders * 2
         n_iter (int)         : Number of times to generate a random list of players
     '''
-    df = pd.read_csv(input_file_name, index_col=0)
+    df = pd.read_csv(input_file_name)
     cols = ['mlb_id', 'dk_salary', 'Predictions']
 
     selections = {}
@@ -136,16 +136,16 @@ def main(input_file_name, n_of=6, n_inf=2,
 
     # TODO - What to do with list of selection lists (output)?
     df = pd.DataFrame.from_dict(selections, orient='index', dtype=None)
-    columns = [n for n in range(1,n_of)]
+    columns = [n for n in range(1,n_of+1)]
     df.columns = columns
     df = df.fillna(value='--')
     print(df)
-    df.to_csv('selections.csv')
+    df.to_csv(output_file_name, sep="|")
 
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        required_parameter_keys = {'batter_predictions.csv'}
+        required_parameter_keys = {'input_file_name', 'output_file_name'}
         missing_keys = []
         parameters   = {}
         for arg in sys.argv[1:]:
@@ -162,8 +162,11 @@ if __name__ == '__main__':
             'The following required parameter keys are not present \
             present in sys.argv: {}'.format(missing_keys)
 
-        input_file_name = parameters['batter_predictions.csv']
+        input_file_name = parameters['input_file_name']
+        output_file_name = parameters['output_file_name']
 
     else:
         input_file_name = 'batter_predictions.csv'
-    main(input_file_name)
+        output_file_name = 'selections.csv'
+
+    main(input_file_name, output_file_name)

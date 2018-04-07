@@ -10,6 +10,8 @@ from bs4 import BeautifulSoup
 from GetData import read_fangraphs_pitcher_data
 # from OpponentPitcherData import read_pitcher_data
 
+# QUESTION - Should we consolidate GetData.py, FormatData.py, and PointsLast30.py
+#            into one file and use classes?
 
 def one_hot(df, columns, cat_cols):
     '''
@@ -61,9 +63,13 @@ def player_data(data_file_path, position, columns, cat_cols):
         df = df.merge(fangraphs_pitcher_df, on='oppt_pitch_name', how='left')
         df = df.drop('oppt_pitch_name', axis=1)
         df['hand_advantage'] = np.where(df['hand'] == df['oppt_pitch_hand'], 0, 1)
+        df = df.drop(['hand', 'oppt_pitch_hand'], axis=1)
     else:
         fangraphs_pitcher_df.rename(index=str, columns={"oppt_pitch_name": "name_last_first"}, inplace=True)
         df = df.merge(fangraphs_pitcher_df, on='name_last_first')
+
+    df['dk_salary'] = df['dk_salary'].fillna(df['fd_salary'])
+    df['fd_salary'] = df['fd_salary'].fillna(df['dk_salary'])
 
     df = df.dropna(axis=0)
 
@@ -77,10 +83,9 @@ def main(data_file_path, position, config, output_file_path):
     columns = config['columns']
     categorical_columns = config['cat_cols']
     df = player_data(data_file_path, position, columns, categorical_columns)
-    # data['result'] = data['result'].map(lambda x: x.lstrip('+-').rstrip('aAbBcC'))
-    df['w_speed'] = df['w_speed'].map(lambda x: str(x))
-    df['w_speed'] = df['w_speed'].map(lambda x: x.rstrip(' mph'))
-    df['w_speed'] = df['w_speed'].map(lambda x: int(x))
+    # df['w_speed'] = df['w_speed'].map(lambda x: str(x))
+    # df['w_speed'] = df['w_speed'].map(lambda x: x.rstrip(' mph'))
+    # df['w_speed'] = df['w_speed'].map(lambda x: int(x))
 
     df.to_csv(output_file_path)
 
@@ -110,11 +115,14 @@ if __name__ == '__main__':
 
         data_file_path   = parameters['data_file_path']
         position         = parameters['position']
-        # NOTE - This is only temporary
-        config           = {'columns': ['p/h','mlb_id','date','hand','oppt_pitch_hand','condition','adi',
-                                        'order','w_speed','w_dir','oppt_pitch_name','dk_salary',
-                                        'fd_salary','fd_pos','dk_points'],
-                            'cat_cols': ['condition','w_dir']
+        # NOTE - This is only temporary and this needs to be set in a config file
+        config           = {'columns': ['p/h','mlb_id','date','hand','oppt_pitch_hand',
+                                        # 'order','w_speed','w_dir','oppt_pitch_name','dk_salary', # For training data
+                                        'oppt_pitch_name','dk_salary',
+                                        'fd_salary','fd_pos','dk_points'], # For training data
+                                        # 'fd_salary','fd_pos'], # For prediction data
+                            # 'cat_cols': ['condition','w_dir']
+                            'cat_cols': []
                             }
         # config           = parameters['config']
 

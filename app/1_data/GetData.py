@@ -6,6 +6,10 @@ import pandas as pd
 from bs4 import BeautifulSoup
 
 
+# QUESTION - Should we consolidate GetData.py, FormatData.py, and PointsLast30.py
+#            into one file Data.py and use classes?
+
+
 def get_rotoguru_data(link):
     '''
     Get player data from rotoguru1 sample data
@@ -23,6 +27,27 @@ def get_rotoguru_data(link):
     df.columns = df.columns.str.lower()
 
     return df
+
+
+def append_new(df, old_file_name, new_file_name):
+    '''
+    Append new entries if they are not in the batter data
+    '''
+    # TODO - df = df.drop_duplicates (this will drop duplicate rows)
+    pass
+
+
+def get_X_data(df, date, output_file_name):
+    '''
+    Get X Data for neural network
+    '''
+    df = df.loc[df['date'] == date]
+    columns_to_drop = list(df.filter(regex='_points').columns)
+    # columns_to_drop.append(list(df.filter(regex='dd_').columns))
+    # columns_to_drop.append(list(df.filter(regex='yh_').columns))
+    df = df.drop(columns=columns_to_drop)
+    df.to_csv(output_file_name)
+    print(df)
 
 
 def read_fangraphs_pitcher_data():
@@ -54,7 +79,10 @@ def main(year):
 
     if year == 'new':
         # TODO - Read new data, prepare for formatter
-        raise ValueError("Not ready for new yet!")
+        link = base_link + '2018.pl'
+        df = get_rotoguru_data(link)
+        get_X_data(df, 20180404, 'raw_X.csv')
+        # raise ValueError("Not ready for new yet!")
     elif year == 'all':
         link = base_link + '2017.pl?&user=madrhatter&key=M3487509151'
         df_2017 = get_rotoguru_data(link)

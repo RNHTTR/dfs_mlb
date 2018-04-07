@@ -1,0 +1,1 @@
+python Knapsack.py input_file_name=../2_prediction/batter_predictions.csv output_file_name=selections.csv

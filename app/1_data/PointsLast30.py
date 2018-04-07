@@ -7,8 +7,10 @@ import sys
 import numpy as np
 import pandas as pd
 
+# QUESTION - Should we consolidate GetData.py, FormatData.py, and PointsLast30.py
+#            into one file and use classes?
 
-def main(start_date, end_date, input_file_name, output_file_name):
+def main(start_date, stop_date, input_file_name, output_file_name):
     '''
 
     '''
@@ -17,7 +19,6 @@ def main(start_date, end_date, input_file_name, output_file_name):
          # NOTE - ANSWER! Sort the DF by mlb_id
     # df = pd.read_csv('batter_data_all.csv', index_col=0)
     df = pd.read_csv(input_file_name, index_col=0)
-    df = df.drop(['hand','oppt_pitch_hand'], axis=1)
 
     row_count = df.shape[0]
 

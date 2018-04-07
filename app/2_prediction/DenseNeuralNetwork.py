@@ -19,13 +19,12 @@ def compile(dim):
     '''
     model = Sequential()
 
-    # dim = len(X.columns)
-
     model.add(Dense(dim, input_dim=dim, kernel_initializer='orthogonal', activation='relu'))
     model.add(BatchNormalization())
     model.add(Dense(math.floor(dim / 2), activation='relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.3, seed=7))
+    # model.add(Dropout(0.3, seed=7))
+    model.add(Dropout(0.3))
     model.add(BatchNormalization())
     model.add(Dense(1, activation='linear'))
 
@@ -35,21 +34,55 @@ def compile(dim):
 
     return model
 
-def fit(input_file_name, scaler=RobustScaler(),
-        train_test=True, should_save=False, model_file_name=None):
+
+def model_train_data(input_file_name):
+    '''
+    '''
+    df = pd.read_csv(input_file_name)
+
+    X = df.drop('dk_points', axis=1)
+    y = df['dk_points']
+    return X, y
+
+
+def model_predict_data(input_file_name, model_file_name, scaler=RobustScaler()):
+    '''
+    '''
+    X = pd.read_csv(input_file_name)
+
+    scaled_X = scaler.fit_transform(X)
+
+    ids      = X['mlb_id'].reset_index().drop('index', axis=1)
+    salaries = X['dk_salary'].reset_index().drop('index', axis=1)
+    pos      = X['fd_pos'].reset_index().drop('index', axis=1)
+
+    model = load_model(model_file_name)
+
+    return {'model'   : model,
+            'scaled_X': scaled_X,
+            'ids'     : ids,
+            'salaries': salaries,
+            'pos'     : pos}
+
+
+def fit(X, y, should_save=False, model_file_name=None, seed=False, scaler=RobustScaler()):
     '''
     Fit the keras neural network model
 
     Args:
-        input_file_name (str)  : Input data file name
-        # output_file_name (str) : I don't think we should have this...
+        # input_file_name (str)  : Input data file name
+        X                      : input X data
+        y                      : input y data
         scaler (sklearn scaler): sk learn feature scaling object
-        train_test (bool)      : True if testing model with train_test_split
+        # train_test (bool)      : True if testing model with train_test_split
+        test                   : True if we want to set a random seed for testing
         should_save (bool)     : True if the model should be saved for future use
         model_file_name (str)  : Must be given if should_save is True
 
     Returns:
-        If should_train:
+        If should_save:
+            None (The model will be saved to model_file_name)
+        Else:
             model (keras model): Trained keras model
             scaled_X_train (DF): Scaled X training data
             scaled_X_test (DF) : Scaled X test data
@@ -58,79 +91,47 @@ def fit(input_file_name, scaler=RobustScaler(),
             ids (Series)       : mlb_id for each player in the test data
             salaries (Series)  : salaries for each player in the test data
             pos  (Series)      : position for each player in the test data
-        If not should_train:
-            model (keras model): Trained keras model
-            scaled_X_train (DF): Scaled X training data
-            y_train (DF)       : y training data
     '''
-    if should_save:
-        assert model_file_name is not None, \
-            'If the model is to be saved, you must give a file name for \
-            model_file_name.'
-    df = pd.read_csv(input_file_name)
-
-    # NOTE - This should not be handled in the neural network file. This should
-    #        should be handled somewhere in data prep (/app/1_data)
-    X = df.drop('dk_points', axis=1)
-    y = df['dk_points']
     dim = len(X.columns)
+    model = compile(dim)
 
-    if train_test:
+    if seed:
         # Set seed for reproducing results
-        seed = 7
         np.random.seed(seed)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=seed)
+    else:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=7)
+    scaled_X_train = scaler.fit_transform(X_train)
+    scaled_X_test  = scaler.transform(X_test)
 
-        scaled_X_train = scaler.fit_transform(X_train)
-        scaled_X_test  = scaler.transform(X_test)
+    model.fit(scaled_X_train, y_train, epochs=10)
 
-        ids = X_test['mlb_id'].reset_index().drop('index', axis=1)
+    if should_save:
+        model.save(model_file_name)
+    else:
+        ids      = X_test['mlb_id'].reset_index().drop('index', axis=1)
         salaries = X_test['dk_salary'].reset_index().drop('index', axis=1)
-        pos = X_test['fd_pos'].reset_index().drop('index', axis=1)
-
-        model = compile(dim)
-        model.fit(scaled_X_train, y_train, epochs=10)
-
+        pos      = X_test['fd_pos'].reset_index().drop('index', axis=1)
         return {'model'         : model,
                 'scaled_X_train': scaled_X_train,
-                'scaled_X_test' : scaled_X_test,
+                'scaled_X'      : scaled_X_test,
                 'y_train'       : y_train,
                 'y_test'        : y_test,
                 'ids'           : ids,
                 'salaries'      : salaries,
                 'pos'           : pos}
 
-    else:
-        X_train = X
-        y_train = y
 
-        scaled_X_train = scaler.fit_transform(X_train)
-
-        model = compile(dim)
-        model.fit(scaled_X_train, y_train, epochs=10)
-
-        if should_save:
-            model.save(model_file_name)
-
-        # QUESTION - Should x, y be written to a csv?
-        return {'model': model, 'scaled_X_train': scaled_X_train,
-                'y_train': y_train}
-
-
-def evaluate(data, should_evaluate=True, should_load=False, model_file_name=None):
+def evaluate(data, should_evaluate=True):
     '''
 
     '''
-    scaled_X_test = data['scaled_X_test']
-    y_test = data['y_test']
-
-    if should_load:
-        model = load_model(model_file_name)
-    else:
-        model = data['model']
+    scaled_X_test = data['scaled_X']
+    model = data['model']
 
     if should_evaluate:
+        y_test = data['y_test']
         model.evaluate(x=scaled_X_test, y=y_test, batch_size=None, verbose=1, sample_weight=None)
 
     predictions = model.predict(scaled_X_test, verbose=1)
@@ -138,53 +139,69 @@ def evaluate(data, should_evaluate=True, should_load=False, model_file_name=None
     return predictions
 
 
-def main(input_file_name, output_file_name):
+def main(output_file_name, predict, **kwargs):
     '''
     '''
-    
-    model_details = fit(input_file_name)
+    if predict:
+        assert 'x_file' in kwargs and 'model_file_name' in kwargs, \
+            'When making real predictions, (i.e. Predict = True), you must pass \
+            an X_file and a model_file_name to load X data and the model.'
+        model_details = model_predict_data(kwargs['x_file'], kwargs['model_file_name'])
 
-    model = model_details['model']
-    scaled_X_train = model_details['scaled_X_train']
-    scaled_X_test = model_details['scaled_X_test']
-    y_train = model_details['y_train']
-    y_test = model_details['y_test']
-    ids = model_details['ids']
-    salaries = model_details['salaries']
-    pos = model_details['pos']
+        predictions = evaluate(model_details, should_evaluate=False)
+    else:
+        assert 'training_file_name' in kwargs, \
+            'A path to a training file must be given if you are not predicting \
+            results.'
 
-    # predictions = evaluate(x=scaled_X_test, y=y_test, batch_size=None, verbose=1, sample_weight=None)
-    predictions = evaluate(model_details)
+        X, y = model_train_data(kwargs['training_file_name'])
 
-    # predictions = model.predict(scaled_X_test, verbose=1)
+        if 'should_save' in kwargs:
+            if kwargs['should_save']:
+                assert 'model_file_name' in kwargs, \
+                    'When saving a model, you must pass a model_file_name.'
+                model_file_name = kwargs['model_file_name']
+                fit(X, y, True, model_file_name)
+                raise SystemExit('Model saved to {}'.format(model_file_name))
+        else:
+            model_details = fit(X, y)
 
-    # Calculate average difference between projected and actual points scored
-    i = 0
-    total = 0
-    total_y = 0
-    good = 0
-    bad = 0
-    for pred, y in zip(predictions, y_test):
-        i += 1
-        diff = abs(pred - y)
-        total += diff
-        total_y += y
-        if pred >= 4.5:
-            if y >= 7.3:
-                good += 1
-            else:
-                bad += 1
-        elif pred < 4.5:
-            if y < 7.3:
-                good += 1
-            else:
-                bad += 1
+        y_train = model_details['y_train']
+        y_test  = model_details['y_test']
 
-    print(predictions.mean())
-    print(y_test.mean())
-    print('good!! {}'.format(good))
-    print('bad :( {}'.format(bad))
-    print('average difference: {}'.format(total / i))
+        predictions = evaluate(model_details, should_evaluate=True)
+
+        # Calculate average difference between projected and actual points scored
+        i = 0
+        total = 0
+        total_y = 0
+        good = 0
+        bad = 0
+        for pred, y in zip(predictions, y_test):
+            i += 1
+            diff = abs(pred - y)
+            total += diff
+            total_y += y
+            if pred >= 4.5:
+                if y >= 7.3:
+                    good += 1
+                else:
+                    bad += 1
+            elif pred < 4.5:
+                if y < 7.3:
+                    good += 1
+                else:
+                    bad += 1
+
+        print(predictions.mean())
+        print(y_test.mean())
+        print('good!! {}'.format(good))
+        print('bad :( {}'.format(bad))
+        print('average difference: {}'.format(total / i))
+
+    ids            = model_details['ids']
+    salaries       = model_details['salaries']
+    pos            = model_details['pos']
 
     # Generate output predictions file for batters
     predictions = predictions.tolist()
@@ -196,14 +213,20 @@ def main(input_file_name, output_file_name):
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        required_parameter_keys = {'input_file_name', 'output_file_name'}
-        missing_keys = []
-        parameters   = {}
+        required_parameter_keys = {'output_file_name', 'predict'}
+        optional_parameter_keys = {'training_file_name', 'should_load',
+                                   'model_file_name', 'should_save', 'X_file'}
+        missing_keys        = []
+        parameters          = {}
+        optional_parameters = {}
         for arg in sys.argv[1:]:
             split_arg       = arg.split('=')
             key             = split_arg[0].lower()
             value           = split_arg[1].lower()
-            parameters[key] = value
+            if key in required_parameter_keys:
+                parameters[key] = value
+            else:
+                optional_parameters[key] = value
 
         for key in required_parameter_keys:
             if key not in set(parameters):
@@ -213,11 +236,15 @@ if __name__ == '__main__':
             'The following required parameter keys are not present \
             present in sys.argv: {}'.format(missing_keys)
 
-        input_file_name  = parameters['input_file_name']
         output_file_name = parameters['output_file_name']
+        predict = True if parameters['predict'] == 'true' else False
+
+        if 'should_load' in optional_parameters:
+            optional_parameters['should_load'] = True if optional_parameters['should_load'] == 'true' else False
+        if 'should_save' in optional_parameters:
+            optional_parameters['should_save'] = True if optional_parameters['should_save'] == 'true' else False
     else:
         input_file_name  = '../../data/20170718_batter_data_2.csv'
         output_file_name = 'batter_predictions_all.csv'
-    # print('inp: {}'.format(input_file_name))
-    # print('oup: {}'.format(output_file_name))
-    main(input_file_name, output_file_name)
+
+    main(output_file_name, predict, **optional_parameters)
