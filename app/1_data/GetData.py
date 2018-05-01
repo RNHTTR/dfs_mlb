@@ -43,8 +43,6 @@ def get_X_data(df, date, output_file_name):
     '''
     df = df.loc[df['date'] == date]
     columns_to_drop = list(df.filter(regex='_points').columns)
-    # columns_to_drop.append(list(df.filter(regex='dd_').columns))
-    # columns_to_drop.append(list(df.filter(regex='yh_').columns))
     df = df.drop(columns=columns_to_drop)
     df.to_csv(output_file_name)
     print(df)
