@@ -1,4 +1,10 @@
 # python DenseNeuralNetwork.py input_file_name=../1_data/batter_data.csv output_file_name=batter_predictions.csv
 
+Train model (prod)
 python DenseNeuralNetwork.py training_file_name=../1_data/batter_data.csv output_file_name=batter_predictions.csv predict=false model_file_name=model.hdf5 should_save=true
+
+Generate Predictions (prod)
 python DenseNeuralNetwork.py X_file=../1_data/x_batter_data.csv output_file_name=batter_predictions_test.csv predict=true model_file_name=model.hdf5 should_load=true
+
+Train model (dev)
+python DenseNeuralNetwork.py training_file_name=../1_data/batter_data.csv output_file_name=batter_predictions.csv predict=false
