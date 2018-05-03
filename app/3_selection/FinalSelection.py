@@ -1,6 +1,6 @@
 import pandas as pd
 
-
+# NOTE: Needs to be merged into Knapsack.py
 df = pd.read_csv('selections.csv', index_col=0, sep='|')
 df = df.apply(lambda x: x.str.lstrip('(').str.rstrip(')').str.split(', '), axis=1)
 idx = ['C', '1B', '2B', 'SS', '3B', 'OF']

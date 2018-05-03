@@ -1,3 +1,4 @@
+import argparse
 import requests
 import sys
 import yaml
@@ -285,4 +286,5 @@ def main():
 
 
 if __name__ == '__main__':
+    # TODO -  Implement argparse to read config file
     main()
