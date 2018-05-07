@@ -50,13 +50,13 @@
   NeuralNetwork:
     required:
       output_file_name: batter_predictions.csv
-      predict         : true
-      # predict: false
+      predict         : false
+      # predict         : false
     optional:
       x-file            : ../1_data/x_batter_data.csv
       model_file_name   : model.hdf5
       # should_load       : true
-      # training_file_name: ../1_data/batter_data.csv
+      training_file_name: ../1_data/batter_data.csv
       # should_save       : true
 
 3_selection:

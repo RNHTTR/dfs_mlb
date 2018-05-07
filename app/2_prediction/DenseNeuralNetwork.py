@@ -11,6 +11,9 @@ from sklearn.preprocessing import RobustScaler
 from tensorflow.python.keras.models import Sequential, load_model
 from tensorflow.python.keras.layers import Dense, Dropout, BatchNormalization
 
+sys.path.append('../..')
+from utils.ReadConfig import read_config
+
 
 def compile(dim):
     '''Compile the keras neural network model
@@ -272,42 +275,12 @@ def main(output_file_name, predict, **kwargs):
     output_df.to_csv(output_file_name, index=False)
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        # NOTE - The predict command line arg is misleading. Predictions are always generated.
-        #        Should be renamed to "train" or similar
-        # TODO - Reformat to config file
-        required_parameter_keys = {'output_file_name', 'predict'}
-        optional_parameter_keys = {'training_file_name', 'should_load',
-                                   'model_file_name', 'should_save', 'X_file'}
-        missing_keys        = []
-        parameters          = {}
-        optional_parameters = {}
-        for arg in sys.argv[1:]:
-            split_arg       = arg.split('=')
-            key             = split_arg[0].lower()
-            value           = split_arg[1].lower()
-            if key in required_parameter_keys:
-                parameters[key] = value
-            else:
-                optional_parameters[key] = value
+    config = read_config('../config.yaml')['2_prediction']['NeuralNetwork']
 
-        for key in required_parameter_keys:
-            if key not in set(parameters):
-                missing_keys.append(key)
+    required_parameters = config['required']
+    optional_parameters = config['optional']
 
-        assert required_parameter_keys.issubset(set(parameters)), \
-            'The following required parameter keys are not present \
-            present in sys.argv: {}'.format(missing_keys)
-
-        output_file_name = parameters['output_file_name']
-        predict = True if parameters['predict'] == 'true' else False
-
-        if 'should_load' in optional_parameters:
-            optional_parameters['should_load'] = True if optional_parameters['should_load'] == 'true' else False
-        if 'should_save' in optional_parameters:
-            optional_parameters['should_save'] = True if optional_parameters['should_save'] == 'true' else False
-    else:
-        input_file_name  = '../../data/20170718_batter_data_2.csv'
-        output_file_name = 'batter_predictions_all.csv'
+    output_file_name = required_parameters['output_file_name']
+    predict = required_parameters['predict']
 
     main(output_file_name, predict, **optional_parameters)

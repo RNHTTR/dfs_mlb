@@ -8,25 +8,17 @@ import pandas as pd
 import numpy as np
 from bs4 import BeautifulSoup
 
+sys.path.append('../..')
+from utils.ObjectChecks import is_int
+from utils.ReadConfig import read_config
 
-# TODO - Reformat GetData.py, FormatData.py, and PointsLast30.py into one
-#        class-based module
-class Data:
+
+# TODO: Reformat MLBData to inherit from generic Data class with read/write capabilities,
+#       one-hot encoding function,
+
+class MLBData:
     '''
     '''
-    def __init__(self, config_file_name):
-        with open(config_file_name) as config:
-            self.config = yaml.load(config)
-
-
-class MLBData(Data):
-    '''
-    '''
-    def __init__(self, config_file_name):
-        with open(config_file_name) as config:
-            self.config = yaml.load(config)
-
-
     def get_rotoguru_data(self, link):
         '''
         Get player data from rotoguru1 sample data
@@ -84,14 +76,6 @@ class MLBData(Data):
         return df
 
 
-    def is_int(self, value):
-      try:
-        int(value)
-        return True
-      except ValueError:
-        return False
-
-
     def get_data(self, config):
         '''
         '''
@@ -102,7 +86,7 @@ class MLBData(Data):
         old_file_name = get_data_config['old_file_name']
         new_file_name = get_data_config['new_file_name']
 
-        if self.is_int(year):
+        if is_int(year):
             link = "http://rotoguru1.com/cgi-bin/mlb-dbd-{}.pl".format(year)
         else:
             base_link = "http://rotoguru1.com/cgi-bin/mlb-dbd-"
@@ -147,11 +131,11 @@ class MLBData(Data):
 
             df = pd.concat([df_2017, df_2016, df_2015], ignore_index=True)
         elif year == '2017':
-            # TODO - Should require username and key from command line to access
+            # TODO - Should require username and key from command line / config to access
             link = link + '&user=madrhatter&key=M3487509151'
             df = self.get_rotoguru_data(link)
         elif year == '2016':
-            # TODO - Should require username and key from command line to access
+            # TODO - Should require username and key from command line / config to access
             link = link + '&user=madrhatter&key=M6911301251'
             df = self.get_rotoguru_data(link)
 
@@ -196,8 +180,6 @@ class MLBData(Data):
             "Position must be given as a single letter, P for pitchers or H for " \
             "hitters."
 
-        # NOTE - This should be done in if __name__ block and passed as a param...
-        # df = get_rotoguru_data()
         df = pd.read_csv(data_file_path)
         df = self.one_hot(df, columns, cat_cols)
         df = df.loc[df['p/h'] == position]
@@ -280,9 +262,13 @@ class MLBData(Data):
 
 
 def main():
-    mlb_data = MLBData('../config.yaml')
-    mlb_data.get_data(mlb_data.config)
-    mlb_data.format_data(mlb_data.config)
+    config = read_config('../config.yaml')
+    # mlb_data = MLBData('../config.yaml')
+    # mlb_data.get_data(mlb_data.config)
+    # mlb_data.format_data(mlb_data.config)
+    mlb_data = MLBData()
+    mlb_data.get_data(config)
+    mlb_data.format_data(config)
 
 
 if __name__ == '__main__':
