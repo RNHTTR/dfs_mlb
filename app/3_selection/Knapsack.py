@@ -1,3 +1,9 @@
+'''
+TODO: This needs to be more configurable via config file. Need more than just i/o file names.
+      Including the number of iterations
+TODO: Need to implement reverse seek for optimal players as well as random seek, and allow these to be configurable.
+'''
+
 import sys
 
 import numpy as np

@@ -5,7 +5,7 @@ Determine how to allocate budget between positions.
 import pandas as pd
 
 
-df = pd.read_csv('../../data/raw_rotoguru_data_2017.csv', index_col=0)
+df = pd.read_csv('../1_data/raw_rotoguru_data_all.csv', index_col=0)
 df = df[['fd_pos', 'date', 'dk_points']]
 # df = df.loc[df['date'] == 20170718]
 

@@ -28,6 +28,18 @@ for i in idx:
             else:
                 final_selection[i] = df.loc[i].iloc[j]
 
+# Get Infielders
 df = pd.DataFrame.from_dict(final_selection, orient='index', dtype=None)
 df.columns = ['mlb_id', 'dk_salary', 'dk_points']
-print(df)
+df['mlb_id'] = pd.to_numeric(df['mlb_id'], downcast='integer')
+player_id_map_df = pd.read_csv('player_id_map.csv')
+df = pd.merge(df, player_id_map_df, on='mlb_id', right_index=True)
+# print(player_id_map_df.head())
+
+# Get outfielders
+of = pd.DataFrame(of, columns=['mlb_id', 'dk_salary', 'dk_points'], index=['OF','OF','OF'])
+of['mlb_id'] = pd.to_numeric(of['mlb_id'], downcast='integer')
+of = pd.merge(of, player_id_map_df, on='mlb_id', right_index=True)
+
+final_selection = pd.concat([df, of])
+print(final_selection)
