@@ -17,13 +17,16 @@ from utils.ReadConfig import read_config
 #       one-hot encoding function,
 
 class MLBData:
-    '''
-    '''
-    def get_rotoguru_data(self, link):
-        '''
-        Get player data from rotoguru1 sample data
+    '''Downloads, formats, and prepares data for the neural network.'''
 
-        Returns
+    def get_rotoguru_data(self, link):
+        '''Get player data from rotoguru
+
+        Args:
+            link (str): Link to rotoguru data
+
+        Returns:
+            df (pd.DataFrame): Raw player data
         '''
         page = requests.get(link)
 
@@ -39,22 +42,29 @@ class MLBData:
 
 
     def append_new(self, new_df, old_file_name):
+        '''Append new entries if they are not in the batter data
+
+        Args:
+            new_df (pd.DataFrame): Newly scraped data from rotoguru
+            old_file_name (str)  : Name of existing data set
+
+        Returns:
+            df (pd.DataFrame): Existing data set with new data appended
         '''
-        Append new entries if they are not in the batter data
-        '''
-        # TODO - df = df.drop_duplicates (this will drop duplicate rows)
         old_df = pd.read_csv(old_file_name, index_col=0)
-        print('new df')
-        print(new_df.head())
-        print('old df\n{}'.format(old_df.head()))
         df = pd.concat([old_df, new_df], ignore_index=True)
+        df = df.drop_duplicates()
 
         return df
 
 
     def get_X_data(self, df, date, output_file_name):
-        '''
-        Get X Data for neural network
+        '''Get X Data for neural network
+
+        Args:
+            df (pd.DataFrame)     : Player data set
+            date (str)            : Date to pass to neural network for predictions
+            output_file_name (str): Name of file to pass to neural network
         '''
         df = df.loc[df['date'] == date]
         columns_to_drop = list(df.filter(regex='_points').columns)
@@ -67,6 +77,12 @@ class MLBData:
         '''
         Get opponent pitcher data to be used for batting data
         https://www.fangraphs.com/leaders.aspx?pos=all&stats=pit&lg=all&qual=y&type=1&season=2017&month=0&season1=2017&ind=0&team=0&rost=0&age=0&filter=&players=0
+
+        Args:
+            pitcher_config (:obj:`dict` of :obj:obj): Configuration details
+
+        Returns:
+            df (pd.DataFrame): Pitcher data
         '''
         df = pd.read_csv(pitcher_config['link'])
         df = df[pitcher_config['columns']]
@@ -77,7 +93,10 @@ class MLBData:
 
 
     def get_data(self, config):
-        '''
+        '''Wrapper to get batter data and save it as a csv
+
+        Args:
+            config (:obj:`dict` of :obj:obj): Configuration details
         '''
         get_data_config = config['1_data']['get_data']
 
@@ -109,7 +128,6 @@ class MLBData:
 
             df = self.append_new(df, old_file_name)
 
-            df = df.drop_duplicates()
             df = df.sort_values(by=['mlb_id', 'date'])
 
             df.to_csv('batter_data.csv')
@@ -144,8 +162,7 @@ class MLBData:
 
 
     def one_hot(self, df, columns, cat_cols):
-        '''
-        One hot encode categorical variables
+        '''One hot encode categorical variables
 
         Args:
             df (Pandas DF)      : Player data
@@ -165,11 +182,14 @@ class MLBData:
 
 
     def player_data(self, data_file_path, position, columns, cat_cols, pitcher_config):
-        '''
+        '''Formats data for neural network
+        
         Args:
+            data_file_path (str): Raw data
             position (str)      : P for pitchers, H for hitters
             columns  (list[str]): All columns to be read into the DataFrame
             cat_cols (list[str]): Categorical columns that need to be one-hot encoded
+            pitcher_config (:obj:`dict` of :obj:obj): Configuration details
 
         Returns:
             df (Pandas DF): Player data for batters or pitchers
@@ -205,7 +225,10 @@ class MLBData:
 
 
     def format_data(self, config):
-        '''
+        '''Wrapper for data formatting. Saves formatted data as a csv
+
+        Args:
+            config (:obj:`dict` of :obj:obj): Configuration details
         '''
         format_config = config['1_data']['format_data']
 
@@ -223,8 +246,12 @@ class MLBData:
 
 
     def points_last_30(self, config):
-        '''
+        '''Gets players average points for the last n games
 
+        Args:
+            config (:obj:`dict` of :obj:obj): Configuration details
+
+        TODO: Test. Implement this if it's useful, delete it otherwise.
         '''
         # Make use of avg points last 30
         # NOTE - how can we configure this to use all data sets?
@@ -263,9 +290,6 @@ class MLBData:
 
 def main():
     config = read_config('../config.yaml')
-    # mlb_data = MLBData('../config.yaml')
-    # mlb_data.get_data(mlb_data.config)
-    # mlb_data.format_data(mlb_data.config)
     mlb_data = MLBData()
     mlb_data.get_data(config)
     mlb_data.format_data(config)

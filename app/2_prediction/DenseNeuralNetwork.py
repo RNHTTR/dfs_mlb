@@ -15,6 +15,11 @@ sys.path.append('../..')
 from utils.ReadConfig import read_config
 
 
+# NOTE: This should be reformatted into classes for reuse elsewhere. Parent class
+#       will use @abstractmethod decorator for compile function.
+# TODO: evaluate method should be renamed to avoid confusion. should be renamed to
+#       predict or something similar with should_evaluate still as a parameter
+
 def compile(dim):
     '''Compile the keras neural network model
 
@@ -34,7 +39,6 @@ def compile(dim):
     model.add(BatchNormalization())
     model.add(Dense(math.floor(dim / 2), activation='relu'))
     model.add(BatchNormalization())
-    # model.add(Dropout(0.3, seed=7))
     model.add(Dropout(0.3))
     model.add(BatchNormalization())
     model.add(Dense(1, activation='linear'))
