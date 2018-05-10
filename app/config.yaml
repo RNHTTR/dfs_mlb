@@ -49,8 +49,8 @@
 2_prediction:
   NeuralNetwork:
     required:
-      output_file_name: batter_predictions.csv
-      predict         : false
+      output_file_name : batter_predictions.csv
+      predict_on_unseen: false
       # predict         : false
     optional:
       x-file            : ../1_data/x_batter_data.csv
