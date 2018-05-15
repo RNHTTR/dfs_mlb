@@ -1,0 +1,74 @@
+---
+1_data:
+  get_data:
+    # year: new
+    year: all
+    # year: 2018
+    # year: 2017
+    # year: 2016
+    date: 20180423
+    old_file_name: batter_data.csv
+    new_file_name: batter_data.csv
+  format_data:
+    input_file_name  : raw_rotoguru_data_all.csv
+    pitcher_or_hitter: H
+    output_file_name : batter_data.csv
+    columns          :
+      - p/h
+      - mlb_id
+      - date
+      - hand
+      - oppt_pitch_hand
+      - oppt_pitch_name
+      - dk_salary
+      - fd_salary
+      - fd_pos
+      - dk_points
+    cat_cols: []
+    pitcher_data:
+      link   : opponent_pitcher_data.csv
+      columns:
+        - AVG
+        - Name
+        - K/9
+        - BB/9
+        - K/BB
+        - HR/9
+        - K%
+        - BB%
+        - WHIP
+        - ERA
+      rename:
+        AVG : avg
+        Name: oppt_pitch_name
+  points_last_30:
+    start_date      : 20180323
+    stop_date       : 20180423
+    input_file_name : batter_data.csv
+    output_file_name: game_data.csv
+2_prediction:
+  NeuralNetwork:
+    required:
+      output_file_name : batter_predictions.csv
+      predict_on_unseen: false
+      # predict         : false
+    optional:
+      x-file            : ../1_data/x_batter_data.csv
+      model_file_name   : model.hdf5
+      # should_load       : true
+      training_file_name: ../1_data/batter_data.csv
+      # should_save       : true
+
+3_selection:
+  Knapsack:
+    input_file_name : ../2_prediction/batter_predictions.csv
+    output_file_name: selections.csv
+  FinalSelection:
+    output_file_name: final_selection.csv
+
+4_delivery:
+  Twilio:
+    sid: YYYYYYYY
+    auth_token: YYYYYYYY
+    to_number: YYYYYYYY
+    from_number: YYYYYYYY
