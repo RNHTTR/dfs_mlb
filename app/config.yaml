@@ -67,4 +67,8 @@
     output_file_name: final_selection.csv
 
 4_delivery:
-  Placeholder
+  Twilio:
+    sid: XXXXXXXX
+    auth_token: XXXXXXXX
+    to_number: XXXXXXXX
+    from_number: XXXXXXXXX
