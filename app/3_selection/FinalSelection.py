@@ -5,6 +5,8 @@ import pandas as pd
 sys.path.append('../..')
 from utils.ReadConfig import read_config
 
+# TODO: Remove hardcoded input file name
+
 
 def main(output_file_name):
     # Read Knapsack.py output and organize into clean DataFrame

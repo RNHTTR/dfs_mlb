@@ -1,32 +1,47 @@
 '''
 Placeholder file for delivering team results
 '''
+import sys
 
-##################### EMAIL #####################
-# Import smtplib for the actual sending function
-# import smtplib
-#
-# # Here are the email package modules we'll need
-# from email.mime.image import MIMEImage
-# from email.mime.multipart import MIMEMultipart
+import pandas as pd
 
-# Do some stuff
-#################################################
+sys.path.append('../..')
+from utils.ReadConfig import read_config
 
-##################### TEXT ######################
-from twilio.rest import Client
 
-# Your Account SID from twilio.com/console
-account_sid = "ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-# Your Auth Token from twilio.com/console
-auth_token  = "your_auth_token"
+def main(sid, auth_token, to_number, from_number, input_file_name):
+    ##################### EMAIL #####################
+    # Import smtplib for the actual sending function
+    # import smtplib
+    #
+    # # Here are the email package modules we'll need
+    # from email.mime.image import MIMEImage
+    # from email.mime.multipart import MIMEMultipart
 
-client = Client(account_sid, auth_token)
+    # Do some stuff
+    #################################################
 
-message = client.messages.create(
-    to="+18135555555",
-    from_="+15017250604",
-    body="Hello from Python!")
+    ##################### TEXT ######################
+    from twilio.rest import Client
 
-print(message.sid)
-#################################################
+    df = pd.read_csv(input_file_name, index_col=0)
+    body = "-\n{}".format(df.to_string())
+
+    client = Client(sid, auth_token)
+
+    message = client.messages.create(
+        to=to_number,
+        from_=from_number,
+        body=body)
+    #################################################
+
+if __name__ == '__main__':
+    config = read_config('../config.yaml')['4_delivery']['Twilio']
+
+    sid             = config['sid']
+    auth_token      = config['auth_token']
+    to_number       = config['to_number']
+    from_number     = config['from_number']
+    input_file_name = config['input_file_name']
+
+    main(sid, auth_token, to_number, from_number, input_file_name)
