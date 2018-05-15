@@ -42,7 +42,6 @@ df.columns = ['mlb_id', 'dk_salary', 'dk_points']
 df['mlb_id'] = pd.to_numeric(df['mlb_id'], downcast='integer')
 player_id_map_df = pd.read_csv('player_id_map.csv')
 df = pd.merge(df, player_id_map_df, on='mlb_id', right_index=True)
-# print(player_id_map_df.head())
 
 # Get outfielders
 outfield = pd.DataFrame(outfield, columns=['mlb_id', 'dk_salary', 'dk_points'], index=['OF','OF','OF'])
