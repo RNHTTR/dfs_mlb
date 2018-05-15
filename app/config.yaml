@@ -63,6 +63,8 @@
   Knapsack:
     input_file_name : ../2_prediction/batter_predictions.csv
     output_file_name: selections.csv
+  FinalSelection:
+    output_file_name: final_selection.csv
 
 4_delivery:
   Placeholder

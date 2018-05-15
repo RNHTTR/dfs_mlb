@@ -3,11 +3,13 @@ TODO: This needs to be more configurable via config file. Need more than just i/
       Including the number of iterations
 TODO: Need to implement reverse seek for optimal players as well as random seek, and allow these to be configurable.
 '''
-
 import sys
 
 import numpy as np
 import pandas as pd
+
+sys.path.append('../..')
+from utils.ReadConfig import read_config
 
 
 def get_salary_and_value(data, salary_index, value_index):
@@ -64,7 +66,6 @@ def knapsack(df, cols, max_weight, n, start):
     j = 1
     for i in range(start, num_players):
         sys.stdout.write('player {} of {} players\r'.format(i, num_players))
-        # sys.stdout.flush()
         sys.stdout.flush()
         current.append(player_data[i])
         for j in range(start, num_players):
@@ -99,7 +100,6 @@ def run_random(n_iter, df, cols, max_weight, n):
 
     for i in range(n_iter):
         print('Iteration {} of {}           \r'.format(i, n_iter))
-        # sys.stdout.flush()
         rand_int = np.random.randint(0, df.shape[0])
         most_valuable = knapsack(df, cols, max_weight, n, rand_int)
         x, value = get_salary_and_value(most_valuable, 1, 2)
@@ -150,29 +150,9 @@ def main(input_file_name, output_file_name, n_of=6, n_inf=2,
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        required_parameter_keys = {'input_file_name', 'output_file_name'}
-        missing_keys = []
-        parameters   = {}
-        for arg in sys.argv[1:]:
-            split_arg       = arg.split('=')
-            key             = split_arg[0].lower()
-            value           = split_arg[1].lower()
-            parameters[key] = value
+    config = read_config('../config.yaml')['3_selection']['Knapsack']
 
-        for key in required_parameter_keys:
-            if key not in set(parameters):
-                missing_keys.append(key)
-
-        assert required_parameter_keys.issubset(set(parameters)), \
-            'The following required parameter keys are not present \
-            present in sys.argv: {}'.format(missing_keys)
-
-        input_file_name = parameters['input_file_name']
-        output_file_name = parameters['output_file_name']
-
-    else:
-        input_file_name = 'batter_predictions.csv'
-        output_file_name = 'selections.csv'
+    input_file_name = config['input_file_name']
+    output_file_name = config['output_file_name']
 
     main(input_file_name, output_file_name)
