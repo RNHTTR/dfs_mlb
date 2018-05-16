@@ -104,6 +104,9 @@ class MLBData:
         date = get_data_config['date']
         old_file_name = get_data_config['old_file_name']
         new_file_name = get_data_config['new_file_name']
+        query_param_2018 = get_data_config['2018_query_param']
+        query_param_2017 = get_data_config['2017_query_param']
+        query_param_2016 = get_data_config['2016_query_param']
 
         if is_int(year):
             link = "http://rotoguru1.com/cgi-bin/mlb-dbd-{}.pl".format(year)
@@ -111,7 +114,7 @@ class MLBData:
             base_link = "http://rotoguru1.com/cgi-bin/mlb-dbd-"
 
         if year == 'new':
-            link = base_link + '2018.pl'
+            link = base_link + '2018.pl?' + query_param_2018
             df = self.get_rotoguru_data(link)
             output_file_name = 'raw_rotoguru_data_{}.csv'.format(year)
 
@@ -135,13 +138,13 @@ class MLBData:
             quit()
 
         elif year == 'all':
-            link = base_link + '2018.pl'
+            link = base_link + '2018.pl?' + query_param_2018
             df_2018 = self.get_rotoguru_data(link)
 
-            link = base_link + '2017.pl?&user=madrhatter&key=M3487509151'
+            link = base_link + '2017.pl?' + query_param_2017
             df_2017 = self.get_rotoguru_data(link)
 
-            link = base_link + '2016.pl?&user=madrhatter&key=M6911301251'
+            link = base_link + '2016.pl?' + query_param_2016
             df_2016 = self.get_rotoguru_data(link)
 
             link = base_link + '2015.pl'
@@ -149,12 +152,10 @@ class MLBData:
 
             df = pd.concat([df_2017, df_2016, df_2015], ignore_index=True)
         elif year == '2017':
-            # TODO - Should require username and key from command line / config to access
-            link = link + '&user=madrhatter&key=M3487509151'
+            link = link + query_param_2017
             df = self.get_rotoguru_data(link)
         elif year == '2016':
-            # TODO - Should require username and key from command line / config to access
-            link = link + '&user=madrhatter&key=M6911301251'
+            link = link + query_param_2016
             df = self.get_rotoguru_data(link)
 
         output_file_name = 'raw_rotoguru_data_{}.csv'.format(year)
@@ -183,7 +184,7 @@ class MLBData:
 
     def player_data(self, data_file_path, position, columns, cat_cols, pitcher_config):
         '''Formats data for neural network
-        
+
         Args:
             data_file_path (str): Raw data
             position (str)      : P for pitchers, H for hitters
